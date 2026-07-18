@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import PhotosUI
 
 /// Lightweight, non-persisted editing state for the recipe form. Keeping
