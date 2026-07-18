@@ -1,12 +1,16 @@
 import SwiftUI
 import SwiftData
 
+/// The "Recetas" tab: published recipes only. Creation and experimentation
+/// happen in the "Pruebas de cocina" tab; a recipe only lands here once
+/// it's been published from there.
 struct RecipeListView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Query(sort: \Recipe.name) private var recipes: [Recipe]
+    @Query(filter: #Predicate<Recipe> { $0.isPublished }, sort: \Recipe.name)
+    private var recipes: [Recipe]
 
+    @Binding var path: NavigationPath
     @State private var searchText = ""
-    @State private var isPresentingNewRecipe = false
 
     private var filteredRecipes: [Recipe] {
         guard !searchText.isEmpty else { return recipes }
@@ -24,12 +28,12 @@ struct RecipeListView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             Group {
                 if recipes.isEmpty {
                     EmptyStateView(
-                        title: "Sin recetas todavía",
-                        message: "Crea tu primera receta y empieza a experimentar en la cocina.",
+                        title: "Sin recetas publicadas",
+                        message: "Termina una prueba de cocina y publícala para verla aquí.",
                         systemImage: "fork.knife.circle"
                     )
                 } else if filteredRecipes.isEmpty {
@@ -56,19 +60,7 @@ struct RecipeListView: View {
             .navigationDestination(for: Recipe.self) { recipe in
                 RecipeDetailView(recipe: recipe)
             }
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        isPresentingNewRecipe = true
-                    } label: {
-                        Label("Nueva receta", systemImage: "plus")
-                    }
-                }
-            }
             .searchable(text: $searchText, prompt: "Buscar por nombre o ingrediente")
-            .sheet(isPresented: $isPresentingNewRecipe) {
-                RecipeFormView(existingRecipe: nil)
-            }
         }
     }
 }

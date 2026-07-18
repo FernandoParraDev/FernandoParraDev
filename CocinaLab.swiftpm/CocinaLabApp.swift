@@ -5,7 +5,7 @@ import SwiftData
 struct CocinaLabApp: App {
     var body: some Scene {
         WindowGroup {
-            RecipeListView()
+            RootTabView()
         }
         .modelContainer(for: [
             Recipe.self,

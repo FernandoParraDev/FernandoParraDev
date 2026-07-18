@@ -11,6 +11,9 @@ final class Recipe {
     var lastTestedAt: Date?
     var coverPhotoFileName: String?
     var notes: String
+    /// false while the recipe is still being experimented on in "Pruebas de
+    /// cocina"; true once published into the main "Recetas" library.
+    var isPublished: Bool
 
     @Relationship(deleteRule: .cascade, inverse: \Ingredient.recipe)
     var ingredients: [Ingredient] = []
@@ -23,7 +26,8 @@ final class Recipe {
         recipeDescription: String = "",
         baseServings: Int = 4,
         notes: String = "",
-        coverPhotoFileName: String? = nil
+        coverPhotoFileName: String? = nil,
+        isPublished: Bool = false
     ) {
         self.id = UUID()
         self.name = name
@@ -33,6 +37,7 @@ final class Recipe {
         self.lastTestedAt = nil
         self.coverPhotoFileName = coverPhotoFileName
         self.notes = notes
+        self.isPublished = isPublished
     }
 
     var orderedIngredients: [Ingredient] {
