@@ -1,0 +1,53 @@
+name: CocinaLab iOS Build & Test
+
+on:
+  push:
+    paths:
+      - "CocinaLab/**"
+      - ".github/workflows/cocinalab-ios.yml"
+  pull_request:
+    paths:
+      - "CocinaLab/**"
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: CocinaLab
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: List available simulators
+        run: xcrun simctl list devices available
+
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project CocinaLab.xcodeproj \
+            -scheme CocinaLab \
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test
+        run: |
+          set -o pipefail
+          DEVICE_NAME=$(xcrun simctl list devices available | grep -m1 -oE 'iPhone [0-9A-Za-z ]+' | head -n1 | sed 's/[[:space:]]*$//')
+          echo "Using simulator: $DEVICE_NAME"
+          xcodebuild test \
+            -project CocinaLab.xcodeproj \
+            -scheme CocinaLab \
+            -destination "platform=iOS Simulator,name=$DEVICE_NAME" \
+            CODE_SIGNING_ALLOWED=NO
