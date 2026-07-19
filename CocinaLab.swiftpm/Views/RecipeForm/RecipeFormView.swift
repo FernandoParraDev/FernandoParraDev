@@ -32,8 +32,13 @@ struct RecipeFormView: View {
         _existingCoverFileName = State(initialValue: existingRecipe?.coverPhotoFileName)
 
         if let existingRecipe {
-            _ingredientDrafts = State(initialValue: existingRecipe.orderedIngredients.map {
-                IngredientDraft(name: $0.name, quantity: $0.quantity, unit: $0.unit)
+            _ingredientDrafts = State(initialValue: existingRecipe.orderedIngredients.map { ingredient in
+                IngredientDraft(
+                    existingIngredientID: ingredient.id,
+                    name: ingredient.name,
+                    quantity: ingredient.primaryVariant?.quantity ?? 0,
+                    unit: ingredient.primaryVariant?.unit ?? ""
+                )
             })
             _stepDrafts = State(initialValue: existingRecipe.orderedSteps.map { step in
                 let variant = step.primaryVariant
@@ -179,17 +184,49 @@ struct RecipeFormView: View {
         dismiss()
     }
 
+    /// Updates ingredients in place when they map to an existing one
+    /// (preserving any extra tested amounts), creates new ingredients for
+    /// new drafts, and deletes ingredients whose draft was removed or left
+    /// blank.
     private func syncIngredients(into recipe: Recipe) {
-        for existing in recipe.ingredients {
-            modelContext.delete(existing)
-        }
-        recipe.ingredients.removeAll()
+        var updatedIngredients: [Ingredient] = []
+        let existingByID = Dictionary(uniqueKeysWithValues: (existingRecipe?.ingredients ?? []).map { ($0.id, $0) })
 
-        for (index, draft) in ingredientDrafts.enumerated() where !draft.name.trimmingCharacters(in: .whitespaces).isEmpty {
-            let ingredient = Ingredient(name: draft.name, quantity: draft.quantity, unit: draft.unit, orderIndex: index)
-            ingredient.recipe = recipe
-            recipe.ingredients.append(ingredient)
-            modelContext.insert(ingredient)
+        for draft in ingredientDrafts {
+            let trimmedName = draft.name.trimmingCharacters(in: .whitespaces)
+            guard !trimmedName.isEmpty else { continue }
+
+            let ingredient: Ingredient
+            if let existingID = draft.existingIngredientID, let matched = existingByID[existingID] {
+                ingredient = matched
+            } else {
+                ingredient = Ingredient(name: trimmedName, orderIndex: 0)
+                ingredient.recipe = recipe
+                recipe.ingredients.append(ingredient)
+                modelContext.insert(ingredient)
+            }
+
+            ingredient.name = trimmedName
+            ingredient.orderIndex = updatedIngredients.count
+
+            if let existingVariant = ingredient.primaryVariant {
+                existingVariant.quantity = draft.quantity
+                existingVariant.unit = draft.unit
+            } else {
+                let variant = IngredientVariant(quantity: draft.quantity, unit: draft.unit, orderIndex: 0)
+                variant.ingredient = ingredient
+                ingredient.variants.append(variant)
+                modelContext.insert(variant)
+            }
+
+            updatedIngredients.append(ingredient)
+        }
+
+        let removedIngredients = (existingRecipe?.ingredients ?? []).filter { existing in
+            !updatedIngredients.contains { $0.id == existing.id }
+        }
+        for removed in removedIngredients {
+            modelContext.delete(removed)
         }
     }
 

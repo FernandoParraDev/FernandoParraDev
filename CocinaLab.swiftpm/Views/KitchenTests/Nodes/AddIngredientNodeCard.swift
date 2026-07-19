@@ -1,30 +1,30 @@
 import SwiftUI
 import SwiftData
 
-/// Trailing "+" node: creates a new step (with its default variant) and
-/// appends it just before this node in the trail.
-struct AddStepNodeCard: View {
+/// Trailing "+" node in the ingredients section: creates a new ingredient
+/// (with a first variant) and appends it just before this node.
+struct AddIngredientNodeCard: View {
     let recipe: Recipe
-    var onCreate: (Step) -> Void
+    var onCreate: (Ingredient) -> Void
 
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
-            Image(systemName: "plus.circle.dashed")
+            Image(systemName: "carrot")
                 .font(.system(size: 48))
                 .foregroundStyle(Theme.terracotta)
-            Text("Añadir paso")
+            Text("Añadir ingrediente")
                 .font(.title3.bold())
-            Text("Suma un paso más a esta receta.")
+            Text("Suma un ingrediente más a esta receta.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button {
-                addStep()
+                addIngredient()
             } label: {
-                Label("Nuevo paso", systemImage: "plus")
+                Label("Nuevo ingrediente", systemImage: "plus")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -39,17 +39,17 @@ struct AddStepNodeCard: View {
         )
     }
 
-    private func addStep() {
-        let step = Step(title: "Paso \(recipe.steps.count + 1)", orderIndex: recipe.steps.count)
-        step.recipe = recipe
-        recipe.steps.append(step)
-        modelContext.insert(step)
+    private func addIngredient() {
+        let ingredient = Ingredient(name: "", orderIndex: recipe.ingredients.count)
+        ingredient.recipe = recipe
+        recipe.ingredients.append(ingredient)
+        modelContext.insert(ingredient)
 
-        let variant = StepVariant(label: "Original", instructions: "", orderIndex: 0)
-        variant.step = step
-        step.variants.append(variant)
+        let variant = IngredientVariant(quantity: 0, unit: "", orderIndex: 0)
+        variant.ingredient = ingredient
+        ingredient.variants.append(variant)
         modelContext.insert(variant)
 
-        onCreate(step)
+        onCreate(ingredient)
     }
 }

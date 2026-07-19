@@ -21,5 +21,6 @@ struct RootTabView: View {
                 .tabItem { Label("Pruebas de cocina", systemImage: "testtube.2") }
                 .tag(RootTab.pruebas)
         }
+        .tint(Theme.terracotta)
     }
 }

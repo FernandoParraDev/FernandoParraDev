@@ -15,8 +15,8 @@ let package = Package(
             bundleIdentifier: "dev.fernandoparra.CocinaLab",
             displayVersion: "1.0",
             bundleVersion: "1",
-            appIcon: .placeholder(icon: .sandwich),
-            accentColor: .presetColor(.orange),
+            appIcon: .placeholder(icon: .openBook),
+            accentColor: .presetColor(.brown),
             supportedDeviceFamilies: [
                 .pad,
                 .phone

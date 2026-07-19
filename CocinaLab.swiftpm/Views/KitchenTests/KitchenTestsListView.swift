@@ -45,6 +45,7 @@ struct KitchenTestsListView: View {
                     }
                 }
             }
+            .background(Theme.background)
             .navigationTitle("Pruebas de cocina")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {

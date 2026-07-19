@@ -10,13 +10,24 @@ struct RecipeCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            StoredPhotoView(fileName: recipe.coverPhotoFileName)
-                .frame(height: 140)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            ZStack(alignment: .topTrailing) {
+                StoredPhotoView(fileName: recipe.coverPhotoFileName)
+                    .frame(height: 140)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-            Text(recipe.name)
-                .font(.headline)
-                .foregroundStyle(.primary)
+                if !recipe.isPublished {
+                    Image(systemName: "testtube.2")
+                        .font(.caption)
+                        .padding(6)
+                        .background(Theme.terracotta, in: Circle())
+                        .foregroundStyle(.white)
+                        .padding(8)
+                }
+            }
+
+            Text(recipe.name.isEmpty ? "Sin nombre" : recipe.name)
+                .cookbookHeading()
+                .foregroundStyle(Theme.ink)
                 .lineLimit(2)
 
             Text(lastTestedText)
@@ -24,10 +35,6 @@ struct RecipeCardView: View {
                 .foregroundStyle(.secondary)
         }
         .padding(10)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(.background)
-                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
-        )
+        .cookbookCard()
     }
 }

@@ -9,7 +9,8 @@ struct InfoNodeCard: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Información general")
-                    .font(.title2.bold())
+                    .cookbookTitle()
+                    .foregroundStyle(Theme.ink)
 
                 PhotosPicker(selection: $coverPhotoItem, matching: .images) {
                     StoredPhotoView(fileName: recipe.coverPhotoFileName)

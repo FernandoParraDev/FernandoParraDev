@@ -2,7 +2,8 @@ import SwiftUI
 import SwiftData
 
 /// The recipe's read view: scalable ingredients, numbered steps with
-/// integrated timers, and branch indicators on any step that has variants.
+/// integrated timers, and branch indicators on any ingredient or step that
+/// has variants.
 struct RecipeDetailView: View {
     let recipe: Recipe
 
@@ -25,8 +26,12 @@ struct RecipeDetailView: View {
             }
             .padding(20)
         }
+        .background(Theme.background)
         .navigationTitle(recipe.name)
         .navigationBarTitleDisplayMode(.large)
+        .navigationDestination(for: Ingredient.self) { ingredient in
+            IngredientVariantsView(ingredient: ingredient)
+        }
         .navigationDestination(for: Step.self) { step in
             StepVariantsView(step: step)
         }
@@ -92,31 +97,20 @@ struct RecipeDetailView: View {
     private var ingredientsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Ingredientes")
-                .font(.title3.bold())
+                .cookbookHeading()
+                .foregroundStyle(Theme.ink)
 
             ForEach(recipe.orderedIngredients) { ingredient in
-                HStack {
-                    Text(formattedQuantity(for: ingredient))
-                        .font(.subheadline.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                        .frame(width: 90, alignment: .leading)
-                    Text(ingredient.name)
-                        .font(.subheadline)
-                    Spacer()
-                }
+                IngredientReadRow(ingredient: ingredient, baseServings: recipe.baseServings, targetServings: targetServings)
             }
         }
-    }
-
-    private func formattedQuantity(for ingredient: Ingredient) -> String {
-        let scaled = ingredient.scaledQuantity(baseServings: recipe.baseServings, targetServings: targetServings)
-        return "\(Formatters.quantity(scaled)) \(ingredient.unit)"
     }
 
     private var stepsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Pasos")
-                .font(.title3.bold())
+                .cookbookHeading()
+                .foregroundStyle(Theme.ink)
 
             ForEach(Array(recipe.orderedSteps.enumerated()), id: \.element.id) { index, step in
                 StepReadRow(step: step, index: index + 1)
@@ -129,7 +123,8 @@ struct RecipeDetailView: View {
         if !recipe.notes.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Notas")
-                    .font(.title3.bold())
+                    .cookbookHeading()
+                    .foregroundStyle(Theme.ink)
                 Text(recipe.notes)
                     .font(.body)
                     .foregroundStyle(.secondary)

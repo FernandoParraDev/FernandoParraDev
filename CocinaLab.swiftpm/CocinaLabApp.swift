@@ -10,6 +10,7 @@ struct CocinaLabApp: App {
         .modelContainer(for: [
             Recipe.self,
             Ingredient.self,
+            IngredientVariant.self,
             Step.self,
             StepVariant.self,
             PhotoAsset.self

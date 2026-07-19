@@ -56,6 +56,7 @@ struct RecipeListView: View {
                     }
                 }
             }
+            .background(Theme.background)
             .navigationTitle("Mis recetas")
             .navigationDestination(for: Recipe.self) { recipe in
                 RecipeDetailView(recipe: recipe)

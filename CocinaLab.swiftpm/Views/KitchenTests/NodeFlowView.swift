@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// Guided, node-by-node experimentation flow for a draft recipe: general
-/// info, ingredients, then one node per step (forking visually when a step
-/// has multiple variants), an "add step" node, and finally publish.
+/// info, one node per ingredient, one node per step (forking visually when
+/// an ingredient or step has multiple variants), "add" nodes, and finally
+/// publish.
 struct NodeFlowView: View {
     let recipe: Recipe
     var onPublish: (Recipe) -> Void
@@ -11,7 +12,9 @@ struct NodeFlowView: View {
     @State private var selection: RecipeNode = .info
 
     private var nodes: [RecipeNode] {
-        var items: [RecipeNode] = [.info, .ingredients]
+        var items: [RecipeNode] = [.info]
+        items += recipe.orderedIngredients.map { .ingredient($0.id) }
+        items += [.addIngredient]
         items += recipe.orderedSteps.map { .step($0.id) }
         items += [.addStep, .publish]
         return items
@@ -31,6 +34,7 @@ struct NodeFlowView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
             }
+            .background(Theme.background)
             .navigationTitle(recipe.name.isEmpty ? "Nueva prueba" : recipe.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -39,6 +43,7 @@ struct NodeFlowView: View {
                 }
             }
         }
+        .tint(Theme.terracotta)
     }
 
     @ViewBuilder
@@ -46,8 +51,14 @@ struct NodeFlowView: View {
         switch node {
         case .info:
             InfoNodeCard(recipe: recipe)
-        case .ingredients:
-            IngredientsNodeCard(recipe: recipe)
+        case .ingredient(let id):
+            if let ingredient = recipe.ingredients.first(where: { $0.id == id }) {
+                IngredientNodeCard(ingredient: ingredient)
+            }
+        case .addIngredient:
+            AddIngredientNodeCard(recipe: recipe) { newIngredient in
+                withAnimation { selection = .ingredient(newIngredient.id) }
+            }
         case .step(let id):
             if let step = recipe.steps.first(where: { $0.id == id }) {
                 StepNodeCard(step: step)

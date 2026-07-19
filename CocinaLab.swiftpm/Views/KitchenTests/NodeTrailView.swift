@@ -56,7 +56,13 @@ struct NodeTrailView: View {
     }
 
     private func hasMultipleVariants(_ node: RecipeNode) -> Bool {
-        guard case .step(let id) = node else { return false }
-        return recipe.steps.first(where: { $0.id == id })?.hasMultipleVariants ?? false
+        switch node {
+        case .step(let id):
+            return recipe.steps.first(where: { $0.id == id })?.hasMultipleVariants ?? false
+        case .ingredient(let id):
+            return recipe.ingredients.first(where: { $0.id == id })?.hasMultipleVariants ?? false
+        default:
+            return false
+        }
     }
 }

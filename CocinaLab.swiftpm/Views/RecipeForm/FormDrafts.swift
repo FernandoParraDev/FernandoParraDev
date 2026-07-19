@@ -7,6 +7,10 @@ import PhotosUI
 /// cancelled without ever touching the store.
 struct IngredientDraft: Identifiable {
     let id = UUID()
+    /// Set when this draft mirrors an already-persisted ingredient, so
+    /// saving can update its primary variant (and preserve any extra
+    /// tested amounts) instead of creating a new one.
+    var existingIngredientID: UUID?
     var name: String = ""
     var quantity: Double = 0
     var unit: String = ""
